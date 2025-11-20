@@ -31,7 +31,7 @@ router.get('/', (req, res) => {
 // READ (GET uno)
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  const sql = 'SELECT * FROM usuarios WHERE id = ?';
+  const sql = 'SELECT * FROM clientes WHERE id_cliente= ?';
   conection.query(sql, [id], (err, results) => {
     if (err) {
       console.error(err);
@@ -45,7 +45,7 @@ router.get('/:id', (req, res) => {
 router.put('/:id', (req, res) => {
   const { id } = req.params;
   const { nombre, email } = req.body;
-  const sql = 'UPDATE usuarios SET nombre = ?, email = ? WHERE id = ?';
+  const sql = 'UPDATE clientes SET nombre = ?, email = ? WHERE id = ?';
   conection.query(sql, [nombre, email, id], (err, result) => {
     if (err) {
       console.error(err);
@@ -56,15 +56,16 @@ router.put('/:id', (req, res) => {
 });
 
 // DELETE
-router.delete('/:id', (req, res) => {
-  const { id } = req.params;
-  const sql = 'DELETE FROM usuarios WHERE id = ?';
-  conection.query(sql, [id], (err, result) => {
+router.delete('/:id_cliente', (req, res) => {
+  const { id_cliente } = req.params;
+  const sql = 'DELETE FROM clientes WHERE id_cliente = ?';
+  conection.query(sql, [id_cliente], (err, result) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ error: 'Error al eliminar el usuario' });
     }
-    res.json({ message: 'Usuario eliminado correctamente' });
+    console.log(id_cliente);
+    res.json({ message: 'usuario eliminado correctamente ✊🏻✊🏻'});
   });
 });
 
