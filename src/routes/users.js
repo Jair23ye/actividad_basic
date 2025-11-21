@@ -5,14 +5,14 @@ const conection = require('../bd/db');
 
 // (POST)
 router.post('/', (req, res) => {
-  const { nombre,apellido, correo,telefono,direccion,fecha_registro } = req.body;
+  const { nombre, apellido, correo, telefono, direccion, fecha_registro } = req.body;
   const sql = 'insert into clientes(nombre,apellido,correo,telefono,direccion,fecha_registro) values(?,?,?,?,?,?)';
-  conection.query(sql, [nombre,apellido, correo,telefono,direccion,fecha_registro], (err, result) => {
+  conection.query(sql, [nombre, apellido, correo, telefono, direccion, fecha_registro], (err, result) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ error: 'Error al crear el usuario' });
     }
-    res.json({ id: result.insertId, nombre,apellido, correo,telefono,direccion,fecha_registro});
+    res.json({ id: result.insertId, nombre, apellido, correo, telefono, direccion, fecha_registro });
   });
 });
 
@@ -44,9 +44,9 @@ router.get('/:id', (req, res) => {
 // UPDATE (PUT)
 router.put('/:id', (req, res) => {
   const { id } = req.params;
-  const { nombre, email } = req.body;
-  const sql = 'UPDATE clientes SET nombre = ?, email = ? WHERE id = ?';
-  conection.query(sql, [nombre, email, id], (err, result) => {
+  const { nombre, apellido,correo,telefono,direccion,fecha_registro } = req.body;
+  const sql = 'UPDATE clientes SET nombre = ?, apellido = ?, correo= ?, telefono = ?, direccion= ?, fecha_registro= ? WHERE id_cliente = ?';
+  conection.query(sql, [nombre, apellido, correo,telefono,direccion,fecha_registro,id], (err, result) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ error: 'Error al actualizar el usuario' });
@@ -65,7 +65,7 @@ router.delete('/:id_cliente', (req, res) => {
       return res.status(500).json({ error: 'Error al eliminar el usuario' });
     }
     console.log(id_cliente);
-    res.json({ message: 'usuario eliminado correctamente ✊🏻✊🏻'});
+    res.json({ message: 'usuario eliminado correctamente ✊🏻✊🏻' });
   });
 });
 
