@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+</head>
+<body>
+
+<h2>Bienvenido, usuario autenticado</h2>
+
+<button onclick="logout()">Cerrar sesión</button>
+
+<script src="/public/js/auth.js"></script>
+<script>requireAuth();</script>
+
+<script>
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>
