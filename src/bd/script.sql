@@ -1,9 +1,7 @@
 CREATE DATABASE IF NOT EXISTS green_bite;
 USE green_bite;
 
--- ==========================================
---   TABLA: Usuarios
--- ==========================================
+
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -16,9 +14,7 @@ CREATE TABLE usuarios (
     estado ENUM('activo', 'inactivo', 'baneado') DEFAULT 'activo'
 );
 
--- ==========================================
---   TABLA: Direcciones de usuario
--- ==========================================
+
 CREATE TABLE direcciones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
@@ -32,9 +28,7 @@ CREATE TABLE direcciones (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );
 
--- ==========================================
---   TABLA: Restaurantes
--- ==========================================
+
 CREATE TABLE restaurantes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
@@ -50,9 +44,7 @@ CREATE TABLE restaurantes (
     estado ENUM('abierto', 'cerrado') DEFAULT 'abierto'
 );
 
--- ==========================================
---   TABLA: Horarios de Restaurante
--- ==========================================
+
 CREATE TABLE restaurante_horarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     restaurante_id INT NOT NULL,
@@ -62,17 +54,13 @@ CREATE TABLE restaurante_horarios (
     FOREIGN KEY (restaurante_id) REFERENCES restaurantes(id)
 );
 
--- ==========================================
---   TABLA: Categorías (vegetariano, vegano, keto, etc.)
--- ==========================================
+
 CREATE TABLE categorias (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) UNIQUE NOT NULL
 );
 
--- ==========================================
---   TABLA INTERMEDIA Restaurante-Categoría
--- ==========================================
+
 CREATE TABLE restaurante_categorias (
     restaurante_id INT,
     categoria_id INT,
@@ -81,9 +69,7 @@ CREATE TABLE restaurante_categorias (
     FOREIGN KEY (categoria_id) REFERENCES categorias(id)
 );
 
--- ==========================================
---   TABLA: Menú
--- ==========================================
+
 CREATE TABLE menu (
     id INT AUTO_INCREMENT PRIMARY KEY,
     restaurante_id INT NOT NULL,
@@ -96,9 +82,7 @@ CREATE TABLE menu (
     FOREIGN KEY (restaurante_id) REFERENCES restaurantes(id)
 );
 
--- ==========================================
---   TABLA: Opciones adicionales (extras)
--- ==========================================
+
 CREATE TABLE menu_extras (
     id INT AUTO_INCREMENT PRIMARY KEY,
     menu_id INT NOT NULL,
@@ -107,9 +91,7 @@ CREATE TABLE menu_extras (
     FOREIGN KEY (menu_id) REFERENCES menu(id)
 );
 
--- ==========================================
---   TABLA: Carrito
--- ==========================================
+
 CREATE TABLE carrito (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
@@ -126,9 +108,7 @@ CREATE TABLE carrito_items (
     FOREIGN KEY (menu_id) REFERENCES menu(id)
 );
 
--- ==========================================
---   TABLA: Pedidos
--- ==========================================
+
 CREATE TABLE pedidos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
@@ -145,9 +125,7 @@ CREATE TABLE pedidos (
     FOREIGN KEY (repartidor_id) REFERENCES usuarios(id)
 );
 
--- ==========================================
---   TABLA: Detalles del pedido
--- ==========================================
+
 CREATE TABLE pedido_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     pedido_id INT NOT NULL,
@@ -158,9 +136,7 @@ CREATE TABLE pedido_items (
     FOREIGN KEY (menu_id) REFERENCES menu(id)
 );
 
--- ==========================================
---   TABLA: Pagos
--- ==========================================
+
 CREATE TABLE pagos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     pedido_id INT NOT NULL,
@@ -171,9 +147,7 @@ CREATE TABLE pagos (
     FOREIGN KEY (pedido_id) REFERENCES pedidos(id)
 );
 
--- ==========================================
---   TABLA: Reseñas de restaurantes
--- ==========================================
+
 CREATE TABLE reseñas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
@@ -185,9 +159,7 @@ CREATE TABLE reseñas (
     FOREIGN KEY (restaurante_id) REFERENCES restaurantes(id)
 );
 
--- ==========================================
---   TABLA: Cupones y Descuentos
--- ==========================================
+
 CREATE TABLE cupones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     codigo VARCHAR(50) UNIQUE NOT NULL,
@@ -210,9 +182,6 @@ CREATE TABLE cupones_usados (
     FOREIGN KEY (pedido_id) REFERENCES pedidos(id)
 );
 
--- ==========================================
---   TABLA: Repartidores ubicación en tiempo real
--- ==========================================
 CREATE TABLE repartidor_posicion (
     id INT AUTO_INCREMENT PRIMARY KEY,
     repartidor_id INT NOT NULL,
