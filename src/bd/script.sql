@@ -1,7 +1,6 @@
 CREATE DATABASE IF NOT EXISTS green_bite;
 USE green_bite;
 
-
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
