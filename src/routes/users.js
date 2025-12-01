@@ -7,12 +7,12 @@ const conection = require('../bd/db');
 // (POST) Crear nuevo usuario
 router.post('/', (req, res) => {
     // Campos de la tabla usuarios (basado en tu estructura anterior)
-    const { nombre, apellido, email, telefono, password_hash, fecha_registro, tipo, estado } = req.body;
-    
-    const sql = 'INSERT INTO usuarios(nombre, apellido, email, telefono, password_hash, fecha_registro, tipo, estado) VALUES(?, ?, ?, ?, ?, ?, ?, ?)';
-    
+    const { nombre, apellido, email, telefono, password_hash, tipo, estado } = req.body;
+
+    const sql = 'INSERT INTO usuarios(nombre, apellido, email, telefono, password_hash, tipo, estado) VALUES(?, ?, ?, ?, ?, ?, ?)';
+
     // Nota: Es mejor práctica hashear el password antes de insertar. Aquí se usa el valor directo.
-    conection.query(sql, [nombre, apellido, email, telefono, password_hash, fecha_registro, tipo, estado], (err, result) => {
+    conection.query(sql, [nombre, apellido, email, telefono, password_hash, tipo, estado], (err, result) => {
         if (err) {
             console.error('Error al crear el usuario:', err);
             return res.status(500).json({ error: 'Error interno al crear el usuario' });
@@ -39,7 +39,7 @@ router.get('/:id', (req, res) => {
     const { id } = req.params;
     // Nota: Por seguridad, evita seleccionar el password_hash
     const sql = 'SELECT id, nombre, apellido, email, telefono, fecha_registro, tipo, estado FROM usuarios WHERE id = ?';
-    
+
     conection.query(sql, [id], (err, results) => {
         if (err) {
             console.error('Error al obtener el usuario:', err);
@@ -53,46 +53,56 @@ router.get('/:id', (req, res) => {
 });
 
 // (PUT) Actualizar un usuario por ID - Versión Dinámica y Robusta
+// usuarios.js (o donde tengas esta ruta)
+
 router.put('/:id', (req, res) => {
     const { id } = req.params;
     const updates = req.body;
-    
-    // Lista de campos que se pueden actualizar. password_hash solo si se envía.
+
+    // Lista de campos que se pueden actualizar.
     const allowedFields = ['nombre', 'apellido', 'email', 'telefono', 'password_hash', 'fecha_registro', 'tipo', 'estado'];
-    
+
     let updateFields = [];
     let values = [];
-    
+
     for (const field of allowedFields) {
+        // 1. Verificar si el campo fue enviado en la solicitud
         if (updates.hasOwnProperty(field)) {
             let valueToSet = updates[field];
+
+            // ==========================================================
+            // === CORRECCIÓN CRÍTICA PARA 'TIPO' Y 'ESTADO' ===
+            // ==========================================================
             
-            // --- CORRECCIÓN EN EL TRATAMIENTO DEL CAMPO 'TIPO' ---
             if (field === 'tipo') {
-                // ASUME que la base de datos espera una CADENA DE TEXTO para 'tipo'.
-                // Reemplaza 'usuario' y 'administrador' con los valores exactos de tu ENUM o VARCHAR.
-                if (valueToSet === 0 || valueToSet === 'usuario') {
-                    valueToSet = 'usuario'; // O el valor que corresponda al 0
-                } else if (valueToSet === 1 || valueToSet === 'administrador') {
-                    valueToSet = 'administrador'; // O el valor que corresponda al 1
-                } else {
-                    // Si viene un valor que no es 0 ni 1, lo dejamos como viene (si es que viene como cadena)
-                    // Si tu frontend envía el ID numérico, probablemente solo necesites el bloque de arriba.
+                // Si el frontend envía un número (0, 1) o un valor booleano, lo forzamos a la cadena correcta
+                if (valueToSet === 0 || valueToSet === false || valueToSet === 'usuario') {
+                    valueToSet = 'usuario'; // Cadena esperada por la DB
+                } else if (valueToSet === 1 || valueToSet === true || valueToSet === 'administrador') {
+                    valueToSet = 'administrador'; // Cadena esperada por la DB
+                }
+                // Si ya es la cadena correcta (ej: 'cliente'), se mantiene.
+            }
+
+            if (field === 'estado') {
+                // ELIMINAMOS EL 'RETURN' QUE ROMPÍA EL BUCLE DE CONSTRUCCIÓN SQL
+                // Si el frontend envía un booleano, un número (0, 1) o una cadena 'true'/'false', lo convertimos.
+                if (valueToSet === 1 || valueToSet === true || valueToSet === 'activo') {
+                    valueToSet = 'activo'; // La cadena que MySQL espera
+                } else if (valueToSet === 0 || valueToSet === false || valueToSet === 'inactivo') {
+                    valueToSet = 'inactivo'; // La cadena que MySQL espera
                 }
             }
-            // --------------------------------------------------------
+            // ==========================================================
 
-            // TRATAMIENTO DE BOOLEANOS/ESTADOS (asumiendo 1/0, si la columna 'estado' es TINYINT)
-            if (field === 'estado') {
-                 // Si 'estado' es un TINYINT(1) que espera 1 o 0
-                 valueToSet = (valueToSet === true || valueToSet === 1 || valueToSet === '1') ? 1 : 0;
-            }
-
+            // 2. Construir la parte SET de la consulta
             updateFields.push(`${field} = ?`);
+            
+            // 3. Agregar el valor a la lista de valores
             values.push(valueToSet);
         }
     }
-    
+
     if (updateFields.length === 0) {
         return res.status(400).json({ error: 'No se proporcionaron campos válidos para actualizar.' });
     }
@@ -117,7 +127,7 @@ router.put('/:id', (req, res) => {
 router.delete('/:id', (req, res) => {
     const { id } = req.params;
     const sql = 'DELETE FROM usuarios WHERE id = ?';
-    
+
     conection.query(sql, [id], (err, result) => {
         if (err) {
             console.error('Error al eliminar el usuario:', err);

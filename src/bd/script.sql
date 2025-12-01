@@ -189,3 +189,17 @@ CREATE TABLE repartidor_posicion (
     ultima_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (repartidor_id) REFERENCES usuarios(id)
 );
+
+INSERT INTO usuarios(nombre, apellido, email, telefono, password_hash, tipo, estado) VALUES('Sofía', 'Gómez', 'prueba@gmail.com', '5551234567', '123', 'cliente', 'activo');
+INSERT INTO usuarios(nombre, apellido, email, telefono, password_hash, tipo, estado) VALUES('Juan', 'Pérez', 'juan.perez@dominio.net', '5559876543', '1234', 'restaurante', 'activo');
+INSERT INTO usuarios(nombre, apellido, email, telefono, password_hash, tipo, estado) VALUES('María', 'Rodríguez', 'maria.rodriguez@otro.org', '5555551122', '12345', 'repartidor', 'inactivo');
+
+INSERT INTO restaurantes(nombre, descripcion, email, telefono, direccion, lat, lng, tiempo_entrega_min, tiempo_entrega_max, rating_promedio, estado) VALUES('La Toscana', 'Auténtica comida italiana con ingredientes frescos.', 'toscana@mail.com', '5553334455', 'Calle Falsa 123', 19.4326, -99.1332, 20, 45, 4.7, 'abierto');
+INSERT INTO restaurantes(nombre, descripcion, email, telefono, direccion, lat, lng, tiempo_entrega_min, tiempo_entrega_max, rating_promedio, estado) VALUES('El Sushi Loco', 'El mejor sushi de la ciudad, fresco y rápido.', 'sushiloco@otro.net', '5552221100', 'Avenida Siempre Viva 742', 19.4120, -99.1500, 30, 60, 4.2, 'abierto');
+INSERT INTO restaurantes(nombre, descripcion, email, telefono, direccion, lat, lng, tiempo_entrega_min, tiempo_entrega_max, rating_promedio, estado) VALUES('Veggie Delights', 'Opciones veganas y vegetarianas saludables.', 'veggiedelights@correo.org', '5558889977', 'Blvd. de los Sueños 50', 19.4500, -99.1000, 15, 35, 4.9, 'cerrado');
+
+INSERT INTO menu (restaurante_id, nombre, descripcion, precio, calorias, proteinas, es_saludable, disponible) VALUES (1, 'Pizza Margherita', 'Clásica pizza con tomate, mozzarella y albahaca.', 150.00, 800, 30, 0, 1);
+INSERT INTO menu (restaurante_id, nombre, descripcion, precio, calorias, proteinas, es_saludable, disponible) VALUES (2, 'California Roll', 'Rollo de sushi con cangrejo, aguacate y pepino.', 95.50, 350, 15, 1, 1);
+INSERT INTO menu (restaurante_id, nombre, descripcion, precio, calorias, proteinas, es_saludable, disponible) VALUES (3, 'Bowl de Lentejas', 'Bowl nutritivo con lentejas, verduras asadas y aderezo tahini.', 120.75, 550, 25, 1, 0);
+
+

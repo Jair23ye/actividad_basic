@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Bite - Panel de Administración</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src=".public/js/admin.js" defer></script>
+    <!-- Configuración de Tailwind para usar el color principal de Green Bite -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'green-bite': '#38a169', // Un tono de verde amigable y saludable
+                        'green-light': '#68d391',
+                        'green-dark': '#2f855a',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <!-- Enlaces a fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos personalizados para la estética */
+        body {
+            background-color: #f7fafc;
+            /* Gris muy claro */
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .card {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 0.75rem;
+        }
+
+        /* Clase para el fondo del modal */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .active-link {
+            background-color: #38a169;
+            /* green-bite */
+            color: white !important;
+        }
+    </style>
+</head>
+
+<body class="flex min-h-screen">
+
+    <!-- BARRA LATERAL (SIDEBAR) -->
+    <aside id="sidebar"
+        class="sidebar fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out bg-white w-64 p-6 shadow-xl z-20">
+        <h1 class="text-3xl font-bold text-green-bite mb-10 border-b-2 pb-2 border-green-bite/20">
+            Green Bite Admin
+        </h1>
+        <nav>
+            <ul>
+                <li>
+                    <button data-view="usuarios"
+                        class="nav-button w-full flex items-center p-3 text-lg font-semibold text-gray-700 hover:bg-green-light hover:text-white rounded-lg mb-3 transition duration-150 active-link">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20v-2a3 3 0 00-5.356-1.857M17 20H7m0 0a3 3 0 01-5.356-1.857M7 20v-2a3 3 0 00-5.356-1.857m0 0H7m0 0a3 3 0 00-5.356-1.857M12 18V5m0 13a2 2 0 003.732 1.25M12 18a2 2 0 013.732-1.25M12 18a2 2 0 00-3.732-1.25M12 18a2 2 0 01-3.732-1.25">
+                            </path>
+                        </svg>
+                        Usuarios
+                    </button>
+                </li>
+                <li>
+                    <button data-view="restaurantes"
+                        class="nav-button w-full flex items-center p-3 text-lg font-semibold text-gray-700 hover:bg-green-light hover:text-white rounded-lg mb-3 transition duration-150">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a2 2 0 012-2h2a2 2 0 012 2v5m-4 0h2">
+                            </path>
+                        </svg>
+                        Restaurantes
+                    </button>
+                </li>
+                <li>
+                    <button data-view="menu"
+                        class="nav-button w-full flex items-center p-3 text-lg font-semibold text-gray-700 hover:bg-green-light hover:text-white rounded-lg mb-3 transition duration-150">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.467 9.5 3.5 8 3.5 6.5 3.5 5.168 5.467 4 6.253M12 6.253c1.168.786 2.5 2.753 4 2.753 1.5 0 2.832-1.967 4-2.753m-4 5.992v3m0 3h.01M12 12.253v3m0 3h.01M9 16.253h6">
+                            </path>
+                        </svg>
+                        Menú
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 p-6 md:p-10 transition-all duration-200">
+        <!-- Botón para abrir/cerrar sidebar en móvil -->
+        <button id="menu-toggle"
+            class="md:hidden p-2 mb-4 text-gray-600 bg-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-green-bite">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                </path>
+            </svg>
+        </button>
+
+        <header class="mb-8">
+            <h2 id="main-title" class="text-4xl font-extrabold text-gray-800">Administración de Usuarios</h2>
+            <p id="main-subtitle" class="text-gray-500 mt-1">Gestión completa de los usuarios de Green Bite.</p>
+        </header>
+
+        <!-- Contenedor del Botón de Creación -->
+        <div class="flex justify-end mb-6">
+            <button id="add-button"
+                class="bg-green-bite hover:bg-green-dark text-white font-bold py-2 px-4 rounded-lg transition duration-150 shadow-md">
+                + Crear Nuevo
+            </button>
+        </div>
+
+        <!-- CONTENEDOR DE LA TABLA (VISTA PRINCIPAL) -->
+        <div id="data-container" class="bg-white p-6 card overflow-x-auto">
+            <!-- Aquí se cargarán dinámicamente las tablas de CRUD -->
+            <p class="text-center text-gray-500">Cargando datos...</p>
+        </div>
+
+        <!-- CONTENEDOR DE MENSAJES -->
+        <div id="message-box" class="fixed bottom-4 right-4 z-50"></div>
+
+    </main>
+
+    <!-- MODAL PARA CREAR/EDITAR -->
+    <div id="crud-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white p-8 card max-w-lg w-full relative">
+            <h3 id="modal-title" class="text-2xl font-bold text-gray-800 mb-6">Crear Usuario</h3>
+
+            <form id="crud-form">
+                <!-- Los campos del formulario se inyectarán aquí por JavaScript -->
+            </form>
+
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="cancel-modal" type="button"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-150">
+                    Cancelar
+                </button>
+                <button id="submit-modal" type="submit"
+                    class="bg-green-bite hover:bg-green-dark text-white font-bold py-2 px-4 rounded-lg transition duration-150">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NUEVO: MODAL DE CONFIRMACIÓN PARA ELIMINAR -->
+    <div id="confirm-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white p-6 card max-w-sm w-full relative">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.772-1.333-2.68-1.333-3.452 0L3.394 18c-.77 1.333.192 3 1.732 3z">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Confirmar Eliminación</h3>
+                <p id="confirm-message" class="text-sm text-gray-500">¿Estás seguro de que quieres eliminar este
+                    registro? Esta acción no se puede deshacer.</p>
+            </div>
+
+            <div class="mt-6 flex justify-center space-x-3">
+                <button id="confirm-cancel" type="button"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-150">
+                    Cancelar
+                </button>
+                <button id="confirm-action" type="button"
+                    class="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-lg transition duration-150">
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- FIN MODAL DE CONFIRMACIÓN -->
+
+    <script>
+        // --- CONFIGURACIÓN Y UTILIDADES GLOBALES ---
+        const BASE_URL = 'http://localhost:3000/api';
+        // NUEVO: Obtener el token de autenticación
+        const AUTH_TOKEN = localStorage.getItem('authToken');
+
+        // 1. COMPROBACIÓN DE TOKEN
+        if (!AUTH_TOKEN) {
+            // Si no hay token, redirigir al login
+            alert("Sesión expirada o no iniciada. Por favor, inicia sesión.");
+            window.location.href = 'login.html'; // Asegúrate que el nombre del archivo sea correcto
+        }
+
+        // ...
+
+        // --- CONFIGURACIÓN Y UTILIDADES GLOBALES --- 
+        let currentView = 'usuarios';
+        let currentEditingId = null;
+        let selectedRestaurantId = null; // Usado solo para la vista de Menú
+        let confirmCallback = null; // Para manejar la acción del modal de confirmación
+        let allRestaurantes = [];
+
+        // Definiciones de esquemas y URLs de los endpoints
+        const VIEWS_CONFIG = {
+            usuarios: {
+                title: 'Administración de Usuarios',
+                subtitle: 'Gestión completa de los usuarios de Green Bite.',
+                url: `${BASE_URL}/usuarios`,
+                fields: [
+                    { name: 'nombre', label: 'Nombre', type: 'text', required: true },
+                    { name: 'apellido', label: 'Apellido', type: 'text', required: false },
+                    { name: 'email', label: 'Email', type: 'email', required: true },
+                    { name: 'telefono', label: 'Teléfono', type: 'tel', required: false },
+                    { name: 'tipo', label: 'Tipo', type: 'select', options: ['cliente', 'repartidor', 'admin', 'restaurante_manager'], required: true },
+                    { name: 'estado', label: 'Estado', type: 'select', options: ['activo', 'inactivo'], required: true },
+                    // En edición, no se pide la contraseña, solo en creación
+                    { name: 'password_hash', label: 'Contraseña (Solo Creación)', type: 'password', required: true, onlyCreate: true },
+                ],
+                tableColumns: ['ID', 'Nombre', 'Email', 'Tipo', 'Estado', 'Fecha'],
+                rowMapper: (item) => [item.id, `${item.nombre} ${item.apellido || ''}`, item.email, item.tipo, item.estado, formatShortDate(item.fecha_registro)],
+            },
+            restaurantes: {
+                title: 'Administración de Restaurantes',
+                subtitle: 'Gestión de los establecimientos de comida saludable.',
+                url: `${BASE_URL}/restaurantes`,
+                fields: [
+                    { name: 'nombre', label: 'Nombre', type: 'text', required: true },
+                    { name: 'descripcion', label: 'Descripción', type: 'textarea', required: false },
+                    { name: 'direccion', label: 'Dirección', type: 'text', required: true },
+                    { name: 'telefono', label: 'Teléfono', type: 'tel', required: false },
+                    { name: 'email', label: 'Email', type: 'email', required: false },
+                    { name: 'estado', label: 'Estado', type: 'select', options: ['abierto', 'cerrado'], required: true },
+                ],
+                tableColumns: ['ID', 'Nombre', 'Teléfono', 'Dirección', 'Estado'],
+                rowMapper: (item) => [item.id, item.nombre, item.telefono, item.direccion, item.estado],
+            },
+            menu: {
+                title: 'Administración de Menú',
+                subtitle: 'Gestión de platos para el restaurante seleccionado.',
+                url: `${BASE_URL}/menu`,
+                // Campos específicos del menú (se adaptan al restaurante_id seleccionado)
+                fields: [
+                    { name: 'id_restaurante', label: 'Restaurante', type: 'select', required: true, dynamicOptions: true },
+                    { name: 'nombre', label: 'Nombre del Plato', type: 'text', required: true },
+                    { name: 'descripcion', label: 'Descripción', type: 'textarea', required: false },
+                    { name: 'precio', label: 'Precio', type: 'number', required: true, step: '0.01' },
+                    { name: 'calorias', label: 'Calorías', type: 'number', required: false },
+                    { name: 'proteinas', label: 'Proteínas (g)', type: 'number', required: false, step: '0.1' },
+                    { name: 'es_saludable', label: 'Es Saludable', type: 'checkbox', required: false },
+                    { name: 'disponible', label: 'Disponible', type: 'checkbox', required: false },
+                ],
+                tableColumns: ['ID', 'Plato', 'Precio', 'Calorías', 'Saludable', 'Disponible'],
+                rowMapper: (item) => [item.id, item.nombre, `$${item.precio}`, item.calorias || 'N/A', item.es_saludable ? 'Sí' : 'No', item.disponible ? 'Sí' : 'No'],
+            }
+        };
+
+        /**
+         * Muestra una notificación temporal.
+         * @param {string} message Mensaje a mostrar.
+         * @param {string} type Tipo de mensaje ('success', 'error', 'info').
+         */
+        function showMessage(message, type = 'info') {
+            const box = document.getElementById('message-box');
+            let color;
+            if (type === 'success') color = 'bg-green-500';
+            else if (type === 'error') color = 'bg-red-500';
+            else color = 'bg-blue-500';
+
+            const alert = document.createElement('div');
+            alert.className = `${color} text-white px-4 py-3 rounded-lg shadow-xl mb-3 transition transform duration-300 ease-out-in`;
+            alert.textContent = message;
+
+            box.appendChild(alert);
+
+            setTimeout(() => {
+                alert.classList.add('opacity-0', 'translate-x-full');
+                alert.addEventListener('transitionend', () => alert.remove());
+            }, 5000);
+        }
+
+        // --- MANEJO DE MODALES PERSONALIZADOS ---
+
+        /**
+         * Muestra el modal de confirmación.
+         * @param {string} message Mensaje de confirmación.
+         * @param {Function} callback Función a ejecutar si el usuario confirma.
+         */
+        function showConfirmModal(message, callback) {
+            document.getElementById('confirm-message').textContent = message;
+            document.getElementById('confirm-modal').classList.remove('hidden');
+            confirmCallback = callback;
+        }
+        /**
+         * Oculta el modal de confirmación.
+         */
+        function hideConfirmModal() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            confirmCallback = null;
+        }
+        // =======================================================
+        // === FUNCIONES AÑADIDAS PARA SOLUCIONAR EL PROBLEMA DEL MENÚ ===
+        // =======================================================
+        /**
+         * Establece el restaurante seleccionado y recarga la vista de menú si es necesario.
+         * @param {number} id ID del restaurante a seleccionar.
+         * @param {string} itemJsonString Cadena JSON segura del ítem.
+         */
+        function selectRestaurantAndEdit(id, itemJsonString) {
+            // 1. Establecer el restaurante como seleccionado
+            selectedRestaurantId = id;
+
+            // 2. Si la vista actual es 'restaurantes', cambiarla a 'menu' y cargar los datos.
+            // Esto hace que el menú aparezca inmediatamente después de la selección.
+            if (currentView === 'restaurantes') {
+                loadData('menu');
+            }
+
+            // 3. Lógica para el modal de edición (usando el itemJsonString)
+            const safeJsonString = itemJsonString.replace(/&quot;/g, '"');
+            try {
+                const itemData = JSON.parse(safeJsonString);
+                console.log("Abriendo modal de edición para restaurante:", itemData.nombre);
+                // La función openModal debe estar implementada para recibir estos datos.
+                openModal(id, itemData);
+            } catch (e) {
+                console.error("Error al parsear el JSON:", e);
+                showMessage('Error al preparar los datos de edición.', 'error');
+            }
+        }
+
+
+        // =======================================================
+        // =======================================================
+
+        function formatShortDate(dateValue) {
+            if (!dateValue) return 'N/A';
+
+            try {
+                const date = new Date(dateValue);
+                // Usamos toLocaleDateString para el formato local si lo prefieres,
+                // pero para consistencia (YYYY-MM-DD):
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0'); // Meses de 0 a 11
+                const day = String(date.getDate()).padStart(2, '0');
+
+                // Formato AAAA-MM-DD
+                return `${year}-${month}-${day}`;
+
+                // Si prefieres formato DD/MM/AAAA usa:
+                // return date.toLocaleDateString('es-ES'); 
+
+            } catch (e) {
+                console.error("Error al formatear la fecha:", e);
+                return 'N/A';
+            }
+        }
+        // --- MANEJO DE VISTAS Y DATOS (CRUD) ---
+
+        /**
+         * Carga los datos y renderiza la tabla para la vista actual.
+         */
+        async function loadData(view) {
+            currentView = view;
+            const config = VIEWS_CONFIG[view];
+            const container = document.getElementById('data-container');
+
+            // ... (Código para títulos y selector de restaurante) ...
+
+            const url = view === 'menu'
+                ? `${config.url}/restaurante/${selectedRestaurantId}`
+                : config.url;
+
+            // 🔑 PASO 1: Obtener el token del almacenamiento local
+            const AUTH_TOKEN = localStorage.getItem('authToken');
+
+            // ⚠️ Comprobación de seguridad (aunque ya se hace al inicio del script, es buena práctica)
+            if (!AUTH_TOKEN) {
+                container.innerHTML = `<p class="text-center text-red-500 p-8">Error: No hay sesión activa.</p>`;
+                // Podrías redirigir al login si no se hizo en la inicialización
+                return;
+            }
+
+
+            try {
+                // 🔑 PASO 2: Añadir el token a los headers de la petición GET
+                const response = await fetch(url, {
+                    method: 'GET', // Método implícito en tu código original, pero lo explicitamos
+                    headers: {
+                        'Content-Type': 'application/json', // Opcional para GET, pero útil
+                        // La clave de la autenticación: Bearer seguido del token
+                        'Authorization': `Bearer ${AUTH_TOKEN}`
+                    }
+                });
+
+                // Manejo de error de autorización 401/403
+                if (response.status === 401 || response.status === 403) {
+                    console.error("Acceso no autorizado o token inválido/expirado.");
+                    localStorage.removeItem('authToken'); // Limpiar token inválido
+                    window.location.href = 'login.html'; // Redirigir al login
+                    return; // Detener la ejecución
+                }
+
+                if (!response.ok) throw new Error('Error al cargar los datos.');
+
+                const data = await response.json();
+                renderTable(data, config);
+
+            } catch (error) {
+                console.error(`Error al obtener datos para ${view}:`, error);
+                container.innerHTML = `<p class="text-center text-red-500 p-8">No se pudieron cargar los datos. Asegúrate de que el backend esté ejecutándose.</p>`;
+            }
+        }
+
+        /**
+         * Renderiza el selector de restaurantes (solo para la vista de menú).
+         */
+        async function loadRestaurantSelector() {
+            let selectorContainer = document.getElementById('restaurant-selector-area');
+            if (!selectorContainer) {
+                selectorContainer = document.createElement('div');
+                selectorContainer.id = 'restaurant-selector-area';
+                const dataContainer = document.getElementById('data-container');
+                if (dataContainer) {
+                    dataContainer.prepend(selectorContainer);
+                } else {
+                    return;
+                }
+            }
+
+            selectorContainer.innerHTML = '<p class="text-center text-green-dark">Cargando lista de restaurantes...</p>';
+
+            try {
+                const response = await fetch(VIEWS_CONFIG.restaurantes.url);
+                if (!response.ok) throw new Error('Error al cargar restaurantes.');
+                const restaurantes = await response.json();
+
+                allRestaurantes = restaurantes; // GUARDAR LA LISTA GLOBALMENTE
+
+                if (restaurantes.length === 0) {
+                    selectedRestaurantId = null;
+                    document.getElementById('add-button').classList.add('hidden'); // Ocultar el botón si no hay restaurantes
+                    selectorContainer.innerHTML = '<p class="text-center text-red-500 p-4">No hay restaurantes registrados. Crea uno primero para gestionar el menú.</p>';
+                    document.getElementById('menu-table-area').innerHTML = '';
+                    return;
+                }
+
+                if (!selectedRestaurantId) {
+                    selectedRestaurantId = restaurantes[0].id;
+                }
+
+                const selectorHTML = `
+            <div class="mb-6 p-4 bg-green-50 rounded-lg border border-green-bite/20 flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
+                <label for="restaurant-select" class="font-semibold text-gray-700 w-full md:w-auto whitespace-nowrap">Selecciona Restaurante:</label>
+                <select id="restaurant-select" class="p-2 border border-gray-300 rounded-lg focus:ring-green-bite focus:border-green-bite w-full md:flex-grow">
+                    ${restaurantes.map(r =>
+                    `<option value="${r.id}" ${r.id == selectedRestaurantId ? 'selected' : ''}>${r.nombre} (ID: ${r.id})</option>`
+                ).join('')}
+                </select>
+                <h3 class="font-bold text-lg text-green-dark mt-4 md:mt-0">${restaurantes.find(r => r.id == selectedRestaurantId)?.nombre || ''}</h3>
+            </div>
+        `;
+                selectorContainer.innerHTML = selectorHTML;
+
+                const selectElement = document.getElementById('restaurant-select');
+                selectElement.removeEventListener('change', handleRestaurantSelectChange);
+                selectElement.addEventListener('change', handleRestaurantSelectChange);
+
+            } catch (error) {
+                console.error("Error cargando selector de restaurantes:", error);
+                selectorContainer.innerHTML = `<p class="text-center text-red-500 p-8">Error al cargar la lista de restaurantes.</p>`;
+            }
+        }
+
+        /**
+         * Handler para el cambio en el selector de restaurantes.
+         */
+        function handleRestaurantSelectChange(e) {
+            selectedRestaurantId = e.target.value || null;
+            loadData('menu'); // Recargar la vista de menú
+        }
+
+
+        /**
+         * Renderiza la tabla de datos.
+         * @param {Array<Object>} data Datos a mostrar.
+         * @param {Object} config Configuración de la vista.
+         */
+        function renderTable(data, config) {
+            const targetContainer = currentView === 'menu'
+                ? document.getElementById('menu-table-area')
+                : document.getElementById('data-container');
+
+            if (!targetContainer) return; // Salir si no hay contenedor de menú
+
+            if (data.length === 0) {
+                targetContainer.innerHTML = `<p class="text-center text-gray-500 p-8">No hay registros de ${currentView} disponibles.</p>`;
+                return;
+            }
+
+            const tableHTML = `
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            ${config.tableColumns.map(col => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${col}</th>`).join('')}
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        ${data.map(item => {
+                // 1. CORRECCIÓN: Evitamos las comillas invertidas (`).
+                // Serializamos a JSON y reemplazamos las comillas dobles (") por su entidad HTML (&quot;).
+                // Esto garantiza que el JSON sea seguro para insertar como una cadena de texto en HTML.
+                const itemJsonSafe = JSON.stringify(item).replace(/"/g, '&quot;');
+
+                return `
+        <tr class="hover:bg-green-50 transition duration-150">
+            ${config.rowMapper(item).map(val => `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${val}</td>`).join('')}
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                <!-- 2. CORRECCIÓN: AÑADIMOS COMILLAS SIMPLES (') alrededor de ${itemJsonSafe} -->
+                <!-- Ahora, el JavaScript dentro de onclick lo ve como una cadena de texto válida. -->
+                <button onclick="openModal(${item.id}, '${itemJsonSafe}')" class="text-green-bite hover:text-green-dark">Editar</button>
+                <button onclick="triggerDelete(${item.id})" class="text-red-600 hover:text-red-800">Eliminar</button>
+            </td>
+        </tr>
+    `;
+            }).join('')}
+</tbody>
+</table>
+`;
+
+            targetContainer.innerHTML = tableHTML;
+        }
+
+        /**
+         * Abre el modal de creación/edición.
+         * @param {number|null} id ID del ítem a editar o null si es nuevo.
+         * @param {Object|null} item Datos del ítem si se está editando.
+         */
+        function openModal(id = null, item = null, estado = null) {
+            currentEditingId = id;
+            const config = VIEWS_CONFIG[currentView];
+            const modal = document.getElementById('crud-modal');
+            const form = document.getElementById('crud-form');
+
+            document.getElementById('modal-title').textContent = id ? `Editar ${config.title.split(' ')[2]}` : `Crear Nuevo ${config.title.split(' ')[2]}`;
+
+            let formHTML = '';
+
+            // Si estamos en el menú, añadimos el campo oculto del restaurante
+            if (currentView === 'menu') {
+                formHTML += `<input type="hidden" name="restaurante_id" value="${selectedRestaurantId}">`;
+            }
+
+            config.fields.forEach(field => {
+                // Omitir campos que solo son para creación si estamos editando
+                if (id && field.onlyCreate) return;
+
+                // Deserializar item JSON si viene de `onclick`
+                const itemData = typeof item === 'string' ? JSON.parse(item.replace(/&quot;/g, '"')) : item;
+                const currentValue = itemData && itemData[field.name] !== undefined ? itemData[field.name] : '';
+
+                formHTML += `
+                    <div class="mb-4">
+                        <label for="${field.name}" class="block text-sm font-medium text-gray-700 mb-1">${field.label}</label>
+                `;
+
+                if (field.type === 'select') {
+                    formHTML += `
+                        <select id="${field.name}" name="${field.name}" ${field.required ? 'required' : ''} class="w-full p-2 border border-gray-300 rounded-lg focus:ring-green-bite focus:border-green-bite">
+                            ${field.options.map(option => `
+                                <option value="${option}" ${currentValue === option ? 'selected' : ''}>${option.charAt(0).toUpperCase() + option.slice(1)}</option>
+                            `).join('')}
+                        </select>
+                    `;
+                } else if (field.type === 'textarea') {
+                    formHTML += `
+                        <textarea id="${field.name}" name="${field.name}" ${field.required ? 'required' : ''} rows="3" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-green-bite focus:border-green-bite">${currentValue}</textarea>
+                    `;
+                } else if (field.type === 'checkbox') {
+                    // Checkbox necesita un tratamiento especial para el valor booleano
+                    // En edición, el valor viene como 0 o 1 de la DB. En creación, usar valor por defecto.
+                    const isChecked = id ? (itemData[field.name] == 1 || itemData[field.name] === true) : (field.name === 'es_saludable' || field.name === 'disponible');
+                    formHTML += `
+                        <div class="flex items-center mt-2">
+                            <input type="checkbox" id="${field.name}" name="${field.name}" ${isChecked ? 'checked' : ''} class="h-4 w-4 text-green-bite border-gray-300 rounded">
+                            <span class="ml-2 text-sm text-gray-600">${field.label}</span>
+                        </div>
+                    `;
+                } else {
+                    formHTML += `
+                        <input type="${field.type}" id="${field.name}" name="${field.name}" value="${currentValue}" ${field.required ? 'required' : ''} ${field.step ? `step="${field.step}"` : ''} class="w-full p-2 border border-gray-300 rounded-lg focus:ring-green-bite focus:border-green-bite">
+                    `;
+                }
+
+                formHTML += `</div>`;
+            });
+
+            form.innerHTML = formHTML;
+            modal.classList.remove('hidden');
+        }
+
+        /**
+         * Maneja el envío del formulario (Creación o Edición).
+         * @param {Event} e Evento de envío del formulario.
+         */
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            const config = VIEWS_CONFIG[currentView];
+            const form = document.getElementById('crud-form');
+            const data = {};
+
+            // 🔑 Paso 1: Obtener el token de autenticación
+            const AUTH_TOKEN = localStorage.getItem('authToken');
+
+            // ⚠️ Validación de Token (si no hay, abortamos y redirigimos)
+            if (!AUTH_TOKEN) {
+                showMessage('Sesión no activa. Redirigiendo al login.', 'error');
+                // Asumiendo que 'login.html' es tu página de inicio de sesión
+                setTimeout(() => window.location.href = 'login.html', 1500);
+                return;
+            }
+
+
+            // Recolectar datos del formulario
+            config.fields.forEach(field => {
+                const input = form.elements[field.name];
+                if (!input) return;
+
+                if (field.type === 'checkbox') {
+                    data[field.name] = input.checked ? 1 : 0;
+                } else if (field.type === 'number') {
+                    if (input.value) data[field.name] = parseFloat(input.value);
+                } else if (field.type === 'password' && currentEditingId) {
+                    if (!input.value) return;
+                    data[field.name] = input.value;
+                } else {
+                    data[field.name] = input.value;
+                }
+            });
+
+            // ... (Lógica de valores por defecto para Menú) ...
+
+            if (!currentEditingId) {
+                if (currentView === 'menu' && data.es_saludable === undefined) data.es_saludable = 1;
+                if (currentView === 'menu' && data.disponible === undefined) data.disponible = 1;
+                if (currentView === 'menu' && !data.restaurante_id) data.restaurante_id = selectedRestaurantId;
+            }
+
+            // Determinar método y URL
+            let method, url;
+            if (currentEditingId) {
+                method = 'PUT';
+                url = `${config.url}/${currentEditingId}`;
+            } else {
+                method = 'POST';
+                url = config.url;
+            }
+
+            // Paso 2: Crear el objeto de headers con el token
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${AUTH_TOKEN}` // ¡Añadir el token aquí!
+            };
+
+
+            try {
+                // 🔑 Paso 3: Usar el objeto headers en la llamada a fetch
+                const response = await fetch(url, {
+                    method: method,
+                    headers: headers, // <-- ¡Aquí se integra!
+                    body: JSON.stringify(data),
+                });
+
+                // ⚠️ Manejo de error de autorización (401 o 403)
+                if (response.status === 401 || response.status === 403) {
+                    showMessage('Sesión no autorizada o expirada. Por favor, vuelve a iniciar sesión.', 'error');
+                    localStorage.removeItem('authToken');
+                    setTimeout(() => window.location.href = 'login.html', 1500);
+                    return;
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Error en la operación de ${method}`);
+                }
+
+                document.getElementById('crud-modal').classList.add('hidden');
+                showMessage(`Registro ${currentEditingId ? 'actualizado' : 'creado'} con éxito.`, 'success');
+                loadData(currentView); // Recargar datos
+
+            } catch (error) {
+                console.error("Error al guardar:", error);
+                showMessage(`Fallo al guardar: ${error.message || 'Verifica la consola para más detalles.'}`, 'error');
+            }
+        }
+
+        /**
+         * Lanza el modal de confirmación antes de intentar eliminar.
+         * @param {number} id ID del ítem a eliminar.
+         */
+        function triggerDelete(id) {
+            showConfirmModal('¿Estás seguro de que quieres eliminar este registro? Esta acción no se puede deshacer.', () => {
+                // Función de callback que ejecuta la eliminación real
+                deleteItem(id);
+            });
+        }
+
+
+        /**
+         * Elimina un ítem (función real después de la confirmación).
+         * @param {number} id ID del ítem a eliminar.
+         */
+        async function deleteItem(id) {
+            // Ocultar modal de confirmación antes de la operación
+            hideConfirmModal();
+
+            const config = VIEWS_CONFIG[currentView];
+            const url = `${config.url}/${id}`;
+
+            // 🔑 Paso 1: Obtener el token de autenticación
+            const AUTH_TOKEN = localStorage.getItem('authToken');
+
+            // ⚠️ Validación de Token (opcional, ya se valida al inicio del script)
+            if (!AUTH_TOKEN) {
+                showMessage('Sesión no activa. Redirigiendo al login.', 'error');
+                setTimeout(() => window.location.href = 'login.html', 1500);
+                return;
+            }
+
+            try {
+                // 🔑 Paso 2: Incluir el token en los headers de la solicitud DELETE
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // La clave: añadir el token Bearer
+                        'Authorization': `Bearer ${AUTH_TOKEN}`
+                    },
+                });
+
+                // ⚠️ Manejo de error de autorización (401 o 403)
+                if (response.status === 401 || response.status === 403) {
+                    showMessage('Sesión no autorizada o expirada. Por favor, vuelve a iniciar sesión.', 'error');
+                    localStorage.removeItem('authToken'); // Limpiar token inválido
+                    setTimeout(() => window.location.href = 'login.html', 1500);
+                    return; // Detener la ejecución
+                }
+
+                if (!response.ok) {
+                    // Si la respuesta no es 2xx, intentamos obtener el mensaje de error del backend
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Error al eliminar.`);
+                }
+
+                showMessage('Registro eliminado con éxito.', 'success');
+                loadData(currentView); // Recargar datos
+
+            } catch (error) {
+                console.error("Error al eliminar:", error);
+                showMessage(`Fallo al eliminar: ${error.message || 'Verifica la consola.'}`, 'error');
+            }
+        }
+
+        // --- INICIALIZACIÓN Y LISTENERS ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar la primera vista
+            loadData(currentView);
+
+            // Listeners para los botones de navegación
+            document.querySelectorAll('.nav-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const newView = e.currentTarget.getAttribute('data-view');
+                    if (newView !== currentView) {
+                        // Limpiar el estado del menú si cambiamos de vista
+                        if (currentView === 'menu' && newView !== 'menu') {
+                            selectedRestaurantId = null;
+                        }
+
+                        loadData(newView);
+
+                        // Actualizar la clase 'active-link'
+                        document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active-link'));
+                        e.currentTarget.classList.add('active-link');
+                    }
+                });
+            });
+
+            // Listener para el botón de 'Crear Nuevo'
+            document.getElementById('add-button').addEventListener('click', () => {
+                openModal(null, null);
+            });
+
+            // Listeners para el modal CRUD
+            document.getElementById('cancel-modal').addEventListener('click', () => {
+                document.getElementById('crud-modal').classList.add('hidden');
+            });
+            document.getElementById('submit-modal').addEventListener('click', handleSubmit);
+
+            // Listener para el botón de toggle en móvil
+            document.getElementById('menu-toggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            });
+
+            // Cerrar modal CRUD al hacer clic en el overlay
+            document.getElementById('crud-modal').addEventListener('click', (e) => {
+                if (e.target.id === 'crud-modal') {
+                    document.getElementById('crud-modal').classList.add('hidden');
+                }
+            });
+
+            // Listeners para el NUEVO modal de Confirmación
+            document.getElementById('confirm-cancel').addEventListener('click', hideConfirmModal);
+
+            document.getElementById('confirm-action').addEventListener('click', () => {
+                if (confirmCallback) {
+                    confirmCallback(); // Ejecutar la función de eliminación
+                }
+                // hideConfirmModal se llama dentro de deleteItem, pero por si acaso:
+                // hideConfirmModal(); 
+            });
+
+            // Cerrar modal de confirmación al hacer clic en el overlay
+            document.getElementById('confirm-modal').addEventListener('click', (e) => {
+                if (e.target.id === 'confirm-modal') {
+                    hideConfirmModal();
+                }
+            });
+
+            // Hacer la función triggerDelete globalmente accesible para el onclick de la tabla
+            window.triggerDelete = triggerDelete;
+            window.openModal = openModal; // Asegurar que openModal también sea global
+        });
+    </script>
+</body>
+
+</html>
