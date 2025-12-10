@@ -1,9 +1,10 @@
 // --- CONFIGURACIÓN Y UTILIDADES GLOBALES ---
 const BASE_URL = 'http://localhost:3000/api';
+
 // NUEVO: Obtener el token de autenticación
 const AUTH_TOKEN = localStorage.getItem('authToken');
 
-// 1. COMPROBACIÓN DE TOKEN
+// // 1. COMPROBACIÓN DE TOKEN
 if (!AUTH_TOKEN) {
     // Si no hay token, redirigir al login
     alert("Sesión expirada o no iniciada. Por favor, inicia sesión.");
@@ -12,7 +13,9 @@ if (!AUTH_TOKEN) {
 
 // ...
 
-// --- CONFIGURACIÓN Y UTILIDADES GLOBALES --- 
+// --- CONFIGURACIÓN Y UTILIDADES GLOBALES ---
+let ID_USUARIO_LOGUEADO = null; 
+let carritoDePedidoo = [];
 let currentView = 'usuarios';
 let currentEditingId = null;
 let selectedRestaurantId = null; // Usado solo para la vista de Menú
@@ -131,7 +134,7 @@ function cambiarTexto() {
             encabezado.textContent = "Administración de usuarios";
             encabeza.textContent = "Gestión de usuarios de Green Bite."
         }
-         if (value === 'menu') {
+        if (value === 'menu') {
 
             let encabezado = document.getElementById("main-title");
             let encabeza = document.getElementById("main-subtitle")
@@ -190,8 +193,8 @@ async function loadData(view) {
 
     // Determinar la URL. Si es 'menu', usamos la URL base sin filtro.
     // Si es otra vista, usamos la URL base de esa vista.
-    const url = config.url; 
-    
+    const url = config.url;
+
     // **IMPORTANTE**: Limpiamos el contenedor y nos aseguramos de no tener áreas de selector antiguas.
     container.innerHTML = `<p class="text-center text-gray-500 p-8" id="loading-message">Cargando datos de ${view}...</p>`;
 
@@ -223,9 +226,9 @@ async function loadData(view) {
         if (!response.ok) throw new Error('Error al cargar los datos.');
 
         const data = await response.json();
-        
+
         // El contenedor objetivo siempre es 'data-container' ahora
-        container.innerHTML = ''; 
+        container.innerHTML = '';
         renderTable(data, config);
 
     } catch (error) {
@@ -241,50 +244,60 @@ async function loadData(view) {
  */
 function renderTable(data, config) {
     const targetContainer = document.getElementById('data-container');
-
     if (!targetContainer) return;
 
     if (data.length === 0) {
         targetContainer.innerHTML = `<p class="text-center text-gray-500 p-8">No hay registros de ${currentView} disponibles.</p>`;
         return;
     }
-    
-    // ... (El resto de la función renderTable es igual) ...
 
     const tableHTML = `
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            ${config.tableColumns.map(col => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${col}</th>`).join('')}
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        ${data.map(item => {
-        // 1. CORRECCIÓN: Evitamos las comillas invertidas (`).
-        // Serializamos a JSON y reemplazamos las comillas dobles (") por su entidad HTML (&quot;).
-        // Esto garantiza que el JSON sea seguro para insertar como una cadena de texto en HTML.
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    ${config.tableColumns.map(col => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${col}</th>`).join('')}
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                ${data.map(item => {
         const itemJsonSafe = JSON.stringify(item).replace(/"/g, '&quot;');
 
+        // --- DETERMINAR QUÉ BOTONES MOSTRAR ---
+        let accionesBotones = "";
+
+        if (currentView === 'menu') {
+            // Vista de menú: Solo botón Agregar
+            accionesBotones = `
+                            <button 
+                                onclick="agregarAlCarritoDirecto(${item.id}, '${item.nombre.replace(/'/g, "\\'")}', ${item.precio})" 
+                                class="text-sm bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded transition duration-150">
+                                Agregar
+                            </button>
+                        `;
+        } else {
+            // Otras vistas (usuarios, restaurantes): Editar y Eliminar
+            accionesBotones = `
+                            <button onclick="openModal(${item.id}, '${itemJsonSafe}')" class="text-green-bite hover:text-green-dark">Editar</button>
+                            <button onclick="triggerDelete(${item.id})" class="text-red-600 hover:text-red-800">Eliminar</button>
+                        `;
+        }
+
         return `
-        <tr class="hover:bg-green-50 transition duration-150">
-            ${config.rowMapper(item).map(val => `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${val}</td>`).join('')}
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                <!-- 2. CORRECCIÓN: AÑADIMOS COMILLAS SIMPLES (') alrededor de ${itemJsonSafe} -->
-                <!-- Ahora, el JavaScript dentro de onclick lo ve como una cadena de texto válida. -->
-                <button onclick="openModal(${item.id}, '${itemJsonSafe}')" class="text-green-bite hover:text-green-dark">Editar</button>
-                <button onclick="triggerDelete(${item.id})" class="text-red-600 hover:text-red-800">Eliminar</button>
-            </td>
-        </tr>
-    `;
+                        <tr class="hover:bg-green-50 transition duration-150">
+                            ${config.rowMapper(item).map(val => `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${val}</td>`).join('')}
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                ${accionesBotones}
+                            </td>
+                        </tr>
+                    `;
     }).join('')}
-</tbody>
-</table>
-`;
+            </tbody>
+        </table>
+    `;
 
     targetContainer.innerHTML = tableHTML;
 }
-
 /**
  * Abre el modal de creación/edición.
  * @param {number|null} id ID del ítem a editar o null si es nuevo.
@@ -373,7 +386,6 @@ async function handleSubmit(e) {
         return;
     }
 
-
     // Recolectar datos del formulario
     config.fields.forEach(field => {
         const input = form.elements[field.name];
@@ -415,16 +427,14 @@ async function handleSubmit(e) {
         'Authorization': `Bearer ${AUTH_TOKEN}` // ¡Añadir el token aquí!
     };
 
-
     try {
-        // 🔑 Paso 3: Usar el objeto headers en la llamada a fetch
+
         const response = await fetch(url, {
             method: method,
-            headers: headers, // <-- ¡Aquí se integra!
+            headers: headers,
             body: JSON.stringify(data),
         });
 
-        // ⚠️ Manejo de error de autorización (401 o 403)
         if (response.status === 401 || response.status === 403) {
             showMessage('Sesión no autorizada o expirada. Por favor, vuelve a iniciar sesión.', 'error');
             localStorage.removeItem('authToken');
@@ -446,6 +456,56 @@ async function handleSubmit(e) {
         showMessage(`Fallo al guardar: ${error.message || 'Verifica la consola para más detalles.'}`, 'error');
     }
 }
+
+function mostrarVentanaResumen() {
+    const modalResumen = document.getElementById('resumen-modal');
+    const listaResumen = document.getElementById('carrito-lista-resumen');
+    const totalPago = document.getElementById('carrito-total-pago');
+
+    listaResumen.innerHTML = ""; // Limpiar antes de llenar
+    let total = 0;
+
+    if (carritoDePedidoo.length === 0) {
+        listaResumen.innerHTML = "<p class='text-gray-500 text-center py-4'>Tu carrito está vacío.</p>";
+    } else {
+        carritoDePedidoo.forEach((item, index) => {
+            const subtotal = item.precio * item.cantidad;
+            total += subtotal;
+
+            const row = document.createElement('div');
+            row.className = "flex justify-between items-center py-2";
+            row.innerHTML = `
+                <div>
+                    <p class="font-semibold text-gray-800">${item.nombre}</p>
+                    <p class="text-xs text-gray-500">$${item.precio.toFixed(2)} x ${item.cantidad}</p>
+                </div>
+                <div class="text-right font-bold text-green-dark">
+                    $${subtotal.toFixed(2)}
+                </div>
+            `;
+            listaResumen.appendChild(row);
+        });
+    }
+
+    totalPago.textContent = `$${total.toFixed(2)}`;
+    modalResumen.classList.remove('hidden'); // Mostrar la ventana
+}
+
+
+function agregarAlCarritoDirecto(id, nombre, precio) {
+    const itemIndex = carritoDePedidoo.findIndex(item => item.id === id);
+
+    if (itemIndex > -1) {
+        carritoDePedidoo[itemIndex].cantidad += 1;
+    } else {
+        carritoDePedidoo.push({ id, nombre, precio: parseFloat(precio), cantidad: 1 });
+    }
+
+    // ACTUALIZACIÓN: Abrir el modal de resumen automáticamente al agregar
+    mostrarVentanaResumen();
+}
+
+
 
 /**
  * Lanza el modal de confirmación antes de intentar eliminar.
@@ -583,6 +643,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // Hacer la función triggerDelete globalmente accesible para el onclick de la tabla
     window.triggerDelete = triggerDelete;
     window.openModal = openModal; // Asegurar que openModal también sea global
+
+
+    const btnCerrarSafe = document.getElementById('cerrar-resumen');
+    if (btnCerrarSafe) {
+        btnCerrarSafe.addEventListener('click', () => {
+            const m = document.getElementById('resumen-modal');
+            if (m) m.classList.add('hidden');
+        });
+    }
+
+    const storedUserId = localStorage.getItem('user_id');
+
+    if (storedUserId) {
+        ID_USUARIO_LOGUEADO = parseInt(storedUserId);
+    } else {
+        // Si no hay usuario logueado, podríamos usar un valor por defecto para pruebas
+        ID_USUARIO_LOGUEADO = 1;
+    }
+
+
+
 });
 
 // =======================================================
@@ -713,6 +794,58 @@ agregarACarritoBtn.addEventListener('click', () => {
     // Si tu aplicación tuviera una vista de Carrito, aquí la actualizarías
     // actualizarVisualizacionCarritoDOM(); 
 });
+
+// Variable Global (Define o carga este valor real desde tu sesión) // <--- Carga el ID real de la sesión o del formulario
+
+/**
+ * Envía el array de carrito temporal al backend para guardar el pedido.
+ */
+async function finalizarPedido() {
+    // ⚠️ Uso de doble 'o'
+    if (carritoDePedidoo.length === 0) {
+        showMessage('El carrito está vacío. Agrega productos antes de finalizar.', 'error');
+        return;
+    }
+
+    const AUTH_TOKEN = localStorage.getItem('authToken');
+
+    try {
+        document.getElementById('resumen-modal').classList.add('hidden');
+
+        // Datos a enviar: Ítems y el ID del usuario que está creando el pedido.
+        const payload = {
+            items: carritoDePedidoo,
+            id_usuario: ID_USUARIO_LOGUEADO // Aquí se pasa el ID para el encabezado
+        };
+
+        const response = await fetch(`${BASE_URL}/pedidos`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${AUTH_TOKEN}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error al guardar el pedido.');
+        }
+
+        // Éxito: Limpiar carrito y avisar.
+        const resultado = await response.json();
+
+        // ⚠️ Uso de doble 'o'
+        carritoDePedidoo = [];
+
+        showMessage(`¡Carrito #${resultado.id_carrito} registrado con éxito en la BD!`, 'success');
+
+    } catch (error) {
+        console.error('Error al finalizar pedido:', error);
+        showMessage(`Fallo al finalizar pedido: ${error.message}`, 'error');
+    }
+}
+
 
 
 // =======================================================

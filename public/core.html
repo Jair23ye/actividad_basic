@@ -197,6 +197,33 @@
             </div>
         </div>
     </div>
+
+    <div id="resumen-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white p-6 card max-w-lg w-full relative">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Resumen de tu Pedido</h3>
+
+            <div id="carrito-lista-resumen" class="max-h-60 overflow-y-auto mb-4 border-b pb-4">
+            </div>
+
+            <div class="flex justify-between items-center text-xl font-bold text-gray-900 mb-6">
+                <span>Total:</span>
+                <span id="carrito-total-pago">$0.00</span>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button id="cerrar-resumen" type="button"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition">
+                    Seguir Agregando
+                </button>
+                <button onclick="finalizarPedido()" type="button"
+                    class="bg-green-bite hover:bg-green-dark text-white font-bold py-2 px-4 rounded-lg transition shadow-md">
+                    Finalizar Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+
+
 </body>
 
 </html>

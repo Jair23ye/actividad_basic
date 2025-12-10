@@ -32,19 +32,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 // Login exitoso (Código de estado 200)
+                // 🚨 PASOS CRÍTICOS: GUARDAR TOKEN y ID DEL USUARIO 🚨
+                if (data.token) {
+                    // 1. GUARDAR EL TOKEN para el acceso a la API (admin.js lo lee)
+                    localStorage.setItem('authToken', data.token);
+                } else {
+                    // Error si no se recibe el token
+                    showMessage('Login exitoso, pero el token de seguridad no fue recibido.', 'error');
+                    return;
+                }
+
+                if (data.user && data.user.id) {
+                    // 2. GUARDAR EL ID del usuario (Necesario para la función finalizarPedido)
+                    localStorage.setItem('user_id', data.user.id);
+                }
+
                 showMessage(`¡Bienvenido, ${data.user.nombre}! Redirigiendo...`, 'success');
-                
-                // 🔐 Aquí es donde guardarías el token JWT si lo estuvieras usando.
-                // localStorage.setItem('userToken', data.token); 
-                
-                // Redirigir a la pantalla principal del sistema (ej. index.html o dashboard.html)
-                // Usamos un pequeño retraso para que el usuario vea el mensaje
+
+                // Redirigir a la pantalla principal del sistema
                 setTimeout(() => {
-                    // Cambia '/dashboard.html' por la ruta de tu pantalla del sistema
-                    window.location.href = '/public/core.html'; 
-                }, 1500); 
+                    window.location.href = '/public/core.html';
+                }, 1500);
 
             } else {
+                // ... (Login fallido) ...
                 // Login fallido (Códigos de estado 400, 401, 403, etc.)
                 showMessage(data.message || 'Error al iniciar sesión. Inténtelo de nuevo.', 'error');
             }
@@ -55,3 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
+
+
+
+
